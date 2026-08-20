@@ -44,3 +44,6 @@ worktrees/
 
 # Trellis local runtime home (sessions, notes, settings)
 .trellis-home/
+
+# agy local state
+.agy-home/
