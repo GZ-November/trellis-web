@@ -1,111 +1,137 @@
 # Trellis
 
-> 一个基于 DeepSeek Harness 构建的独立学术 + 职业工作台。
+> A standalone academic and career workbench built on DeepSeek Harness.
 
-Trellis 是为你个人长期使用的本地优先工作台：收集岗位、联系人、课程、学分、比赛和知识笔记，让 Agent 帮你归档、分析、规划和搜索。所有数据默认保存在 Trellis 自己的目录里，不污染你的 DeepSeek Harness 开发环境。
+Trellis is a local-first personal workbench that helps you collect job postings, contacts, courses, credits, competitions, and knowledge notes, and lets an agent archive, analyze, plan, and search them for you. All data stays in Trellis's own directories, so it never interferes with your DeepSeek Harness development environment.
 
 ![Trellis Web UI](assets/screenshots/trellis-home.png)
 
-## 功能
+## Features
 
-- **本地优先**：SQLite 存储，数据在 `.trellis-data/`，可随时导出。
-- **独立运行环境**：Trellis 使用自己的 `.trellis-home/`，与开发用的 `~/.dsh` 完全隔离。
-- **网页自动归档**：粘贴网址或内容，`trellis_archive` 自动整理成笔记并登记来源。
-- **职业追踪**：岗位 JD、联系人、申请状态、比赛/奖学金。
-- **学业规划**：课程、毕业要求、学期计划、毕业时间推算。
-- **技能差距分析**：把目标技能和你的课程/笔记对比，找出缺口。
-- **知识库导出**：一键导出 JSON + Markdown，方便外部查看和备份。
-- **完全插件化**：基于 DeepSeek Harness / Cordis，所有能力都是插件。
+- **Local-first storage**: SQLite database in `.trellis-data/`, easily exportable.
+- **Isolated runtime**: Trellis uses its own `.trellis-home/`, completely separate from `~/.dsh`.
+- **Auto-archiving**: Paste a URL or content and `trellis_archive` turns it into a structured note with a source record.
+- **Career tracking**: job descriptions, contacts, applications, competitions, and scholarships.
+- **Academic planning**: courses, degree requirements, term plans, and graduation forecasting.
+- **Skill gap analysis**: compare target skills against your courses and notes to find what is missing.
+- **Knowledge export**: export the whole knowledge base to JSON + Markdown for external review and backup.
+- **Fully plugin-based**: built on DeepSeek Harness / Cordis, so every capability is a plugin.
 
-## 快速开始
+## Quick Start
 
-### 环境要求
+### Prerequisites
 
 - Node.js `^22.19 || >=24`
 - pnpm
-- DeepSeek API Key（仅 Agent 对话时需要；构建和 UI 不需要）
+- DeepSeek API Key (only needed for agent conversations; build and UI work without it)
 
-### 安装与构建
+### Install and Build
 
 ```bash
-git clone <你的 Trellis 仓库地址>
+git clone https://github.com/GZ-November/trellis-web.git
 cd trellis-web
 pnpm install
 pnpm run build
 ```
 
-### 启动 Trellis Web
+### Start Trellis Web
 
 ```bash
 DSH_HOME=/absolute/path/to/trellis-web/.trellis-home \
 pnpm dsh --profile trellis --patch examples/trellis/cordis.yml
 ```
 
-打开 http://127.0.0.1:3081。
+Open http://127.0.0.1:3081.
 
-> 如果你在仓库根目录运行，可以直接用：
+> When running from the repository root, you can use:
 >
 > ```bash
 > DSH_HOME=$PWD/.trellis-home pnpm dsh --profile trellis --patch examples/trellis/cordis.yml
 > ```
 
-### 配置模型
+### Configure the Model
 
-打开 Web UI 后进入 **设置 → 模型**，填入 DeepSeek API Key 即可开始对话。Trellis 的所有内置工具都只依赖 DeepSeek API，不需要额外服务。
+Open **Settings → Models** in the Web UI and enter your DeepSeek API Key. All built-in Trellis tools only need DeepSeek API; no extra services are required.
 
-## 数据隔离
+## Data Isolation
 
-| 目录 | 用途 |
+| Directory | Purpose |
 |---|---|
-| `.trellis-home/` | Trellis 自己的 DSH 运行配置（profile） |
-| `.trellis-data/` | Trellis 的 SQLite 数据库和导出文件 |
-| `~/.dsh/` | 你的 DeepSeek Harness 开发环境（Trellis 不读写） |
+| `.trellis-home/` | Trellis's own DSH runtime configuration (profile) |
+| `.trellis-data/` | Trellis's SQLite database and export files |
+| `~/.dsh/` | Your DeepSeek Harness development environment (Trellis never writes to it) |
 
-把整个 `trellis-web` 目录迁移到其他机器时，`.trellis-home/` 和 `.trellis-data/` 会跟着一起走。
+When you move the whole `trellis-web` directory to another machine, `.trellis-home/` and `.trellis-data/` move with it.
 
-## Agent 工具
+## Agent Tools
 
-| 工具 | 说明 |
+| Tool | Description |
 |---|---|
-| `trellis_archive` | 归档网页/内容为笔记，并登记来源 |
-| `trellis_job_import` | 导入岗位 JD |
-| `trellis_job_list` | 查询岗位 |
-| `trellis_contact_import` | 保存 LinkedIn/联系人 |
-| `trellis_application_upsert` | 跟踪申请状态 |
-| `trellis_note_create` | 创建知识笔记 |
-| `trellis_link_note` | 给笔记添加双向链接 |
-| `trellis_course_upsert` | 录入课程 |
-| `trellis_degree_requirement_upsert` | 录入毕业要求 |
-| `trellis_academic_plan_upsert` | 录入学期选课计划 |
-| `trellis_source_register` | 登记招聘页/课程页/比赛页来源 |
-| `trellis_competition_import` | 录入比赛/奖学金 |
-| `trellis_search` | 跨全部表搜索 |
-| `trellis_summary` | 汇总知识库状态 |
-| `trellis_export` | 导出知识库为 JSON + Markdown |
-| `trellis_skill_gap` | 技能差距分析 |
-| `trellis_graduation_forecast` | 毕业时间/学分推算 |
+| `trellis_archive` | Archive a web page or pasted content as a note and register its source |
+| `trellis_job_import` | Import a job posting / JD |
+| `trellis_job_list` | Query saved job postings |
+| `trellis_contact_import` | Save a LinkedIn profile or contact |
+| `trellis_application_upsert` | Track an application's status |
+| `trellis_note_create` | Create a knowledge note |
+| `trellis_link_note` | Add bidirectional links to a note |
+| `trellis_course_upsert` | Upsert a course |
+| `trellis_degree_requirement_upsert` | Upsert a graduation requirement |
+| `trellis_academic_plan_upsert` | Upsert a term plan |
+| `trellis_source_register` | Register a source such as a career page or course catalog |
+| `trellis_competition_import` | Save a competition or scholarship |
+| `trellis_search` | Search across all Trellis tables |
+| `trellis_summary` | Summarize the state of the knowledge base |
+| `trellis_export` | Export the knowledge base as JSON + Markdown |
+| `trellis_skill_gap` | Analyze skill gaps against courses and notes |
+| `trellis_graduation_forecast` | Estimate remaining credits and graduation time |
 
-## 项目结构
+## Project Structure
 
 ```text
 trellis-web/
-├── .trellis-home/          # Trellis 独立 DSH 运行环境
-├── .trellis-data/          # 本地数据（不入库）
-├── examples/trellis/       # Trellis 启动 overlay
-├── packages/trellis/trellis/  # Trellis 插件（存储 + 工具）
-├── apps/web/               # Web 前端
-└── assets/screenshots/     # README 截图
+├── .trellis-home/              # Trellis isolated DSH runtime
+├── .trellis-data/              # Local data (not committed)
+├── examples/trellis/           # Trellis launch overlay
+├── packages/trellis/trellis/   # Trellis plugin (storage + tools)
+├── apps/web/                   # Web frontend
+└── assets/screenshots/         # README screenshots
 ```
 
-## 技术栈
+## Tech Stack
 
-- [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) — Agent 运行时
-- Cordis — 插件化框架
-- SQLite — 本地存储
-- React / Vite — Web UI
+- [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) — agent runtime
+- Cordis — plugin framework
+- SQLite — local storage
+- React / Vite — web UI
+
+## Design Philosophy
+
+Trellis was designed around a few core ideas:
+
+1. **It is a separate product, not a fork of DeepSeek Harness.** Trellis reuses DeepSeek Harness as its runtime and plugin system, but keeps its own identity, UI, data, and configuration.
+
+2. **Data and development environments must never mix.** Trellis stores its runtime in `.trellis-home/` and its user data in `.trellis-data/`. Your existing `~/.dsh` environment stays untouched, which makes Trellis safe to experiment with and easy to move.
+
+3. **Everything is a plugin.** Following DeepSeek Harness's philosophy, every Trellis feature is implemented as a Cordis plugin. This keeps the core upgradeable and makes it easy to add, remove, or replace capabilities.
+
+4. **The agent should do the boring work.** Instead of manually organizing links, JDs, contacts, and course plans, the user pastes raw information and the agent structures it into the local knowledge base.
+
+5. **Only DeepSeek API is required.** External integrations such as Gemini, Codex, or browser automation are optional. The core workflow works with a single DeepSeek API key.
+
+6. **Local-first and portable.** All knowledge is stored in a local SQLite database and can be exported to JSON or Markdown. Moving Trellis to another machine moves the data with it.
+
+7. **Built incrementally from real needs.** Trellis started as a simple storage plugin and grew into a workbench: archive → career tracking → academic planning → skill gap analysis → graduation forecasting → custom UI.
+
+## Roadmap
+
+- Web page fetching with `web_fetch` / browser MCP
+- LinkedIn collection via manual export or browser automation
+- HUSD course catalog crawler
+- Interactive dashboard and knowledge preview UI
+- Scheduled job / competition monitoring
 
 ## License
 
 [MIT](LICENSE)
 
-Trellis 是基于 DeepSeek Harness 的独立发行版，DeepSeek Harness 同样使用 MIT License。
+Trellis is an independent distribution built on DeepSeek Harness, which is also MIT licensed.
