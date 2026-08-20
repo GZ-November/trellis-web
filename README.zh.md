@@ -84,6 +84,11 @@ pnpm dsh --profile trellis --patch examples/trellis/cordis.yml
 | `trellis_export` | 导出知识库为 JSON + Markdown |
 | `trellis_skill_gap` | 技能差距分析 |
 | `trellis_graduation_forecast` | 毕业时间/学分推算 |
+| `trellis_pipeline` | 按状态查看申请管道 |
+| `trellis_deadlines` | 查看岗位和比赛截止日期 |
+| `trellis_outreach_draft` | 生成联系人约谈草稿 |
+| `trellis_course_recommend` | 根据目标技能推荐课程 |
+| `trellis_auto_file` | 自动识别并归档原始内容到对应表 |
 
 ## 项目结构
 

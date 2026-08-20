@@ -129,23 +129,26 @@ function registerJobTools(ctx: Context, jobs: KvTable<string, JobRecord>): void 
       render: jsonResult,
     },
     async execute(args): Promise<JsonValue> {
-      const id = newId('job')
+      const existing = [...jobs.entries()].find(([, record]) =>
+        (args.url !== undefined && record.url === args.url)
+        || (record.title.toLowerCase() === args.title.toLowerCase() && record.company.toLowerCase() === args.company.toLowerCase()))
+      const id = existing?.[0] ?? newId('job')
       const record: JobRecord = {
         id,
         title: args.title,
         company: args.company,
-        location: args.location,
-        url: args.url,
-        description: args.description ?? '',
-        posted_at: args.posted_at,
-        deadline: args.deadline,
-        status: args.status ?? 'watching',
-        tags: args.tags ?? [],
-        created_at: now(),
+        location: args.location ?? existing?.[1].location,
+        url: args.url ?? existing?.[1].url,
+        description: args.description ?? existing?.[1].description ?? '',
+        posted_at: args.posted_at ?? existing?.[1].posted_at,
+        deadline: args.deadline ?? existing?.[1].deadline,
+        status: args.status ?? existing?.[1].status ?? 'watching',
+        tags: [...new Set([...(existing?.[1].tags ?? []), ...(args.tags ?? [])])],
+        created_at: existing?.[1].created_at ?? now(),
         updated_at: now(),
       }
       await jobs.put(id, record)
-      return jsonValue({ ok: true, id, record })
+      return jsonValue({ ok: true, id, record, created: existing === undefined })
     },
   }))
 
@@ -188,21 +191,24 @@ function registerContactTools(ctx: Context, contacts: KvTable<string, ContactRec
       render: jsonResult,
     },
     async execute(args): Promise<JsonValue> {
-      const id = newId('contact')
+      const existing = [...contacts.entries()].find(([, record]) =>
+        (args.linkedin_url !== undefined && record.linkedin_url === args.linkedin_url)
+        || (record.name.toLowerCase() === args.name.toLowerCase() && (args.company === undefined || record.company === args.company)))
+      const id = existing?.[0] ?? newId('contact')
       const record: ContactRecord = {
         id,
         name: args.name,
-        linkedin_url: args.linkedin_url,
-        headline: args.headline,
-        company: args.company,
-        relationship: args.relationship,
-        notes: args.notes ?? '',
-        outreach_stage: args.outreach_stage ?? 'not_contacted',
-        created_at: now(),
+        linkedin_url: args.linkedin_url ?? existing?.[1].linkedin_url,
+        headline: args.headline ?? existing?.[1].headline,
+        company: args.company ?? existing?.[1].company,
+        relationship: args.relationship ?? existing?.[1].relationship,
+        notes: args.notes ?? existing?.[1].notes ?? '',
+        outreach_stage: args.outreach_stage ?? existing?.[1].outreach_stage ?? 'not_contacted',
+        created_at: existing?.[1].created_at ?? now(),
         updated_at: now(),
       }
       await contacts.put(id, record)
-      return jsonValue({ ok: true, id, record })
+      return jsonValue({ ok: true, id, record, created: existing === undefined })
     },
   }))
 }
@@ -737,6 +743,248 @@ function registerGraduationForecastTool(
   }))
 }
 
+
+function registerPipelineTool(ctx: Context, tables: TrellisTables): void {
+  ctx.tools.register(defineTool({
+    name: 'trellis_pipeline',
+    description: 'Show the application pipeline grouped by status: watching, applied, interviewing, offer, rejected.',
+    parameters: {},
+    output: {
+      schema: { type: 'json' },
+      render: jsonResult,
+    },
+    execute(): Promise<JsonValue> {
+      const jobById = new Map([...tables.jobs.entries()].map(([id, record]) => [id, record]))
+      const groups = new Map<string, Array<{ application_id: string; job_id: string; title: string; company: string; next_action: string }>>()
+      for (const [id, record] of tables.applications.entries()) {
+        const job = jobById.get(record.job_id)
+        const status = record.status
+        const item = {
+          application_id: id,
+          job_id: record.job_id,
+          title: job?.title ?? 'Unknown job',
+          company: job?.company ?? 'Unknown company',
+          next_action: record.next_action,
+        }
+        const list = groups.get(status) ?? []
+        list.push(item)
+        groups.set(status, list)
+      }
+      const pipeline = [...groups.entries()].map(([status, items]) => ({ status, count: items.length, items }))
+      return Promise.resolve(jsonValue({ ok: true, pipeline }))
+    },
+  }))
+}
+
+function registerDeadlinesTool(ctx: Context, tables: TrellisTables): void {
+  ctx.tools.register(defineTool({
+    name: 'trellis_deadlines',
+    description: 'List upcoming deadlines from saved jobs and competitions. Deadlines are returned as stored; sort them by ISO date when possible.',
+    parameters: {
+      limit: { type: 'integer', description: 'Maximum number of deadlines to return.' },
+    },
+    output: {
+      schema: { type: 'json' },
+      render: jsonResult,
+    },
+    execute(args): Promise<JsonValue> {
+      const items: Array<{ kind: string; id: string; title: string; deadline?: string }> = []
+      for (const [id, record] of tables.jobs.entries()) {
+        if (record.deadline !== undefined) items.push({ kind: 'job', id, title: `${record.title} @ ${record.company}`, deadline: record.deadline })
+      }
+      for (const [id, record] of tables.competitions.entries()) {
+        if (record.deadline !== undefined) items.push({ kind: 'competition', id, title: record.name, deadline: record.deadline })
+      }
+      items.sort((a, b) => {
+        if (a.deadline === undefined) return 1
+        if (b.deadline === undefined) return -1
+        return a.deadline.localeCompare(b.deadline)
+      })
+      const limited = args.limit === undefined ? items : items.slice(0, args.limit)
+      return Promise.resolve(jsonValue({ ok: true, deadlines: limited }))
+    },
+  }))
+}
+
+function registerOutreachTool(ctx: Context, tables: TrellisTables): void {
+  ctx.tools.register(defineTool({
+    name: 'trellis_outreach_draft',
+    description: 'Generate a template outreach message for a saved contact, optionally linked to a target job. This is a deterministic draft; the agent can personalize it.',
+    parameters: {
+      contact_id: { type: 'string', required: true, description: 'Trellis contact id.' },
+      job_id: { type: 'string', description: 'Optional Trellis job id to reference in the message.' },
+      tone: { type: 'string', description: 'professional or casual. Defaults to professional.' },
+    },
+    output: {
+      schema: { type: 'json' },
+      render: jsonResult,
+    },
+    execute(args): Promise<JsonValue> {
+      const contact = tables.contacts.get(args.contact_id)
+      if (contact === undefined) {
+        return Promise.resolve(jsonValue({ ok: false, error: 'contact_not_found', contact_id: args.contact_id }))
+      }
+      const job = args.job_id === undefined ? undefined : tables.jobs.get(args.job_id)
+      const firstName = contact.name.split(' ')[0] ?? contact.name
+      const roleLine = job === undefined ? '' : ` I'm particularly interested in the ${job.title} role at ${job.company}.`
+      const relationshipLine = contact.relationship === undefined || contact.relationship === ''
+        ? ' I found your profile on LinkedIn and was impressed by your experience.'
+        : ` We are connected through ${contact.relationship}.`
+      const headlineLine = contact.headline === undefined || contact.headline === ''
+        ? ''
+        : ` I noticed your work as ${contact.headline}.`
+      const tone = args.tone ?? 'professional'
+      const closing = tone === 'casual' ? 'Would you be up for a quick chat?' : 'Would you be open to a 15-minute conversation?'
+      const draft = `Hi ${firstName},${roleLine}${relationshipLine}${headlineLine}\n\n${closing}\n\nBest regards,\n[Your name]`
+      return Promise.resolve(jsonValue({ ok: true, contact_id: contact.id, job_id: job?.id, draft }))
+    },
+  }))
+}
+
+function registerCourseRecommendTool(ctx: Context, tables: TrellisTables): void {
+  ctx.tools.register(defineTool({
+    name: 'trellis_course_recommend',
+    description: 'Recommend courses from your catalog that best match a list of target skills or remaining degree requirements.',
+    parameters: {
+      skills: { type: 'array', items: { type: 'string' }, description: 'Target skills to match against course titles, tags, and prerequisites.' },
+      max_results: { type: 'integer', description: 'Maximum number of recommendations.' },
+    },
+    output: {
+      schema: { type: 'json' },
+      render: jsonResult,
+    },
+    execute(args): Promise<JsonValue> {
+      const skills = (args.skills ?? []).map(skill => skill.toLowerCase())
+      const scored: Array<{ id: string; code: string; title: string; credits: number; score: number; reasons: string[] }> = []
+      for (const [id, record] of tables.courses.entries()) {
+        const haystack = `${record.code} ${record.title} ${record.prerequisites.join(' ')}`.toLowerCase()
+        const reasons: string[] = []
+        let score = 0
+        for (const skill of skills) {
+          if (haystack.includes(skill)) {
+            score += 1
+            reasons.push(skill)
+          }
+        }
+        if (score > 0 || skills.length === 0) {
+          scored.push({ id, code: record.code, title: record.title, credits: record.credits, score, reasons })
+        }
+      }
+      scored.sort((a, b) => b.score - a.score || a.code.localeCompare(b.code))
+      const max = args.max_results ?? 10
+      return Promise.resolve(jsonValue({ ok: true, recommendations: scored.slice(0, max) }))
+    },
+  }))
+}
+
+function registerAutoFileTool(ctx: Context, tables: TrellisTables): void {
+  const inferKind = (title: string | undefined, url: string | undefined, content: string | undefined): string => {
+    const text = `${title ?? ''} ${url ?? ''} ${content ?? ''}`.toLowerCase()
+    if (url?.includes('linkedin.com/in/')) return 'contact'
+    if (/(job|career|careers|vacancy|jd|responsibilities|requirements)/.test(text)) return 'job'
+    if (/(course|syllabus|credits|prerequisite|semester|curriculum)/.test(text)) return 'course'
+    if (/(competition|scholarship|deadline|prize|award)/.test(text)) return 'competition'
+    return 'note'
+  }
+
+  ctx.tools.register(defineTool({
+    name: 'trellis_auto_file',
+    description: 'File raw pasted content or a URL into the right part of Trellis. It detects whether the content looks like a job, contact, course, competition, or general note, stores it in the matching table, and returns what it created.',
+    parameters: {
+      content: { type: 'string', description: 'Raw text to classify and store.' },
+      url: { type: 'string', description: 'Source URL when archiving a link.' },
+      title: { type: 'string', description: 'Optional title.' },
+    },
+    output: {
+      schema: { type: 'json' },
+      render: jsonResult,
+    },
+    async execute(args): Promise<JsonValue> {
+      if (args.content === undefined && args.url === undefined) {
+        return Promise.resolve(jsonValue({ ok: false, error: 'content_or_url_required' }))
+      }
+      const kind = inferKind(args.title, args.url, args.content)
+      const nowIso = now()
+      const noteId = newId('note')
+      const note: NoteRecord = {
+        id: noteId,
+        title: args.title ?? args.url ?? 'Auto-filed content',
+        content: args.content ?? '',
+        kind,
+        tags: [kind],
+        links: [],
+        source_url: args.url,
+        created_at: nowIso,
+        updated_at: nowIso,
+      }
+      await tables.notes.put(noteId, note)
+
+      const created: string[] = ['note']
+      if (kind === 'job') {
+        const firstLine = (args.content ?? '').split('\n')[0]?.trim() ?? 'Untitled job'
+        const companyMatch = /(?:at|@)\s+([A-Za-z0-9&.\- ]+)/i.exec(args.content ?? '')
+        const jobId = newId('job')
+        const job: JobRecord = {
+          id: jobId,
+          title: firstLine,
+          company: companyMatch?.[1]?.trim() ?? 'Unknown company',
+          url: args.url,
+          description: args.content ?? '',
+          status: 'watching',
+          tags: ['auto-filed'],
+          created_at: nowIso,
+          updated_at: nowIso,
+        }
+        await tables.jobs.put(jobId, job)
+        created.push('job')
+      } else if (kind === 'contact' && args.url !== undefined) {
+        const slug = args.url.split('/').filter(Boolean).pop() ?? 'Unknown'
+        const contactId = newId('contact')
+        const contact: ContactRecord = {
+          id: contactId,
+          name: slug.replace(/-/g, ' '),
+          linkedin_url: args.url,
+          notes: args.content ?? '',
+          outreach_stage: 'not_contacted',
+          created_at: nowIso,
+          updated_at: nowIso,
+        }
+        await tables.contacts.put(contactId, contact)
+        created.push('contact')
+      } else if (kind === 'course') {
+        const codeMatch = /[A-Za-z]{2,4}\s?\d{3,4}/.exec(args.content ?? '')
+        const courseId = newId('course')
+        const course: CourseRecord = {
+          id: courseId,
+          code: codeMatch?.[0]?.replace(/\s+/g, '') ?? 'UNKNOWN',
+          title: args.title ?? (args.content ?? '').split('\n')[0]?.trim() ?? 'Untitled course',
+          credits: 0,
+          status: 'planned',
+          prerequisites: [],
+          created_at: nowIso,
+          updated_at: nowIso,
+        }
+        await tables.courses.put(courseId, course)
+        created.push('course')
+      } else if (kind === 'competition') {
+        const competitionId = newId('competition')
+        const competition: CompetitionRecord = {
+          id: competitionId,
+          name: args.title ?? (args.content ?? '').split('\n')[0]?.trim() ?? 'Untitled competition',
+          url: args.url,
+          notes: args.content ?? '',
+          created_at: nowIso,
+          updated_at: nowIso,
+        }
+        await tables.competitions.put(competitionId, competition)
+        created.push('competition')
+      }
+
+      return Promise.resolve(jsonValue({ ok: true, kind, note_id: noteId, created }))
+    },
+  }))
+}
+
 /**
  * Install the Trellis plugin: open the domain and register all model-facing
  * tools. The domain close is an effect, so unloading the plugin cleans up.
@@ -786,6 +1034,11 @@ export async function apply(ctx: Context, config: Config): Promise<void> {
   registerExportTool(ctx, tables)
   registerSkillGapTool(ctx, tables.courses, tables.notes)
   registerGraduationForecastTool(ctx, tables.courses, tables.requirements, tables.plans)
+  registerPipelineTool(ctx, tables)
+  registerDeadlinesTool(ctx, tables)
+  registerOutreachTool(ctx, tables)
+  registerCourseRecommendTool(ctx, tables)
+  registerAutoFileTool(ctx, tables)
 
   ctx.inject(['workspaceRegistry'], (innerCtx) => {
     const wsReg = (innerCtx as unknown as {

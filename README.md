@@ -84,6 +84,11 @@ When you move the whole `trellis-web` directory to another machine, `.trellis-ho
 | `trellis_export` | Export the knowledge base as JSON + Markdown |
 | `trellis_skill_gap` | Analyze skill gaps against courses and notes |
 | `trellis_graduation_forecast` | Estimate remaining credits and graduation time |
+| `trellis_pipeline` | Show the application pipeline grouped by status |
+| `trellis_deadlines` | List upcoming job and competition deadlines |
+| `trellis_outreach_draft` | Generate a template outreach message for a contact |
+| `trellis_course_recommend` | Recommend courses matching target skills |
+| `trellis_auto_file` | Auto-classify and file raw content into the right table |
 
 ## Project Structure
 
