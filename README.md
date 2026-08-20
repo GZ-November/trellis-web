@@ -90,6 +90,14 @@ When you move the whole `trellis-web` directory to another machine, `.trellis-ho
 | `trellis_course_recommend` | Recommend courses matching target skills |
 | `trellis_auto_file` | Auto-classify and file raw content into the right table |
 
+## Web Routes
+
+| Route | Purpose |
+|---|---|
+| `/` | Main Trellis chat window |
+| `/trellis` | Trellis home menu |
+| `/trellis/canvas` | Interactive knowledge graph canvas |
+
 ## Project Structure
 
 ```text

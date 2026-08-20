@@ -90,6 +90,14 @@ pnpm dsh --profile trellis --patch examples/trellis/cordis.yml
 | `trellis_course_recommend` | 根据目标技能推荐课程 |
 | `trellis_auto_file` | 自动识别并归档原始内容到对应表 |
 
+## Web 路由
+
+| 路由 | 用途 |
+|---|---|
+| `/` | Trellis 主聊天窗口 |
+| `/trellis` | Trellis 首页菜单 |
+| `/trellis/canvas` | 知识图谱画布 |
+
 ## 项目结构
 
 ```text

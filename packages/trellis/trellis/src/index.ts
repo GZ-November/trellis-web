@@ -1121,5 +1121,69 @@ export async function apply(ctx: Context, config: Config): Promise<void> {
         res.end(JSON.stringify({ ok: false, error: 'Not found' }))
       },
     }), 'trellis: /api/trellis route')
+
+    innerCtx.effect(() => webServer.register({
+      kind: 'exact',
+      path: '/trellis/canvas',
+      handler: (_req: IncomingMessage, res: ServerResponse): void => {
+        const html = [
+          '<!doctype html>',
+          '<html lang="en"><head><meta charset="utf-8"><title>Trellis Canvas</title>',
+          '<style>',
+          'body{margin:0;background:#0f1a14;color:#e8f5ee;font-family:ui-sans-serif,system-ui,sans-serif}',
+          'header{padding:16px 24px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;gap:12px;align-items:center}',
+          'h1{font-size:18px;margin:0}',
+          'svg{width:100vw;height:calc(100vh - 60px);display:block}',
+          '.node{fill:#1e7a58;stroke:#4ad096;stroke-width:1.5;cursor:pointer}',
+          '.node:hover{fill:#2ea878}',
+          '.edge{stroke:rgba(255,255,255,.25);stroke-width:1}',
+          '.label{fill:#e8f5ee;font-size:10px;pointer-events:none}',
+          '</style></head><body>',
+          '<header><h1>Trellis Knowledge Canvas</h1><span id="stats"></span></header>',
+          '<svg id="graph"></svg>',
+          '<script>',
+          'fetch("/api/trellis/knowledge").then(r=>r.json()).then(data=>{',
+          'const nodes=data.graph.nodes,edges=data.graph.edges;',
+          'document.getElementById("stats").textContent=`${nodes.length} nodes · ${edges.length} edges`;',
+          'const svg=document.getElementById("graph");',
+          'const NS="http://www.w3.org/2000/svg";',
+          'const cx=innerWidth/2,cy=innerHeight/2;',
+          'const angle=2*Math.PI/nodes.length;',
+          'const pos=new Map();',
+          'nodes.forEach((n,i)=>{const r=Math.min(innerWidth,innerHeight)*0.35;const x=cx+r*Math.cos(angle*i);const y=cy+r*Math.sin(angle*i);pos.set(n.id,{x,y});});',
+          'edges.forEach(e=>{const a=pos.get(e.source),b=pos.get(e.target);if(!a||!b)return;const line=document.createElementNS(NS,"line");line.setAttribute("x1",a.x);line.setAttribute("y1",a.y);line.setAttribute("x2",b.x);line.setAttribute("y2",b.y);line.setAttribute("class","edge");svg.appendChild(line);});',
+          'nodes.forEach(n=>{const p=pos.get(n.id);if(!p)return;const g=document.createElementNS(NS,"g");g.setAttribute("transform",`translate(${p.x},${p.y})`);const c=document.createElementNS(NS,"circle");c.setAttribute("r",8);c.setAttribute("class","node");c.addEventListener("click",()=>{fetch(`/api/trellis/document?id=${encodeURIComponent(n.id)}`).then(r=>r.json()).then(d=>{alert(d.data.title+"\\n\\n"+(d.data.summary||""));});});g.appendChild(c);const t=document.createElementNS(NS,"text");t.setAttribute("class","label");t.setAttribute("y",-12);t.setAttribute("text-anchor","middle");t.textContent=n.title.length>24?n.title.slice(0,24)+"…":n.title;g.appendChild(t);svg.appendChild(g);});',
+          '}).catch(e=>document.getElementById("stats").textContent="Failed to load: "+e);',
+          '</script></body></html>',
+        ].join('\n')
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
+        res.end(html)
+      },
+    }), 'trellis: /trellis/canvas route')
+
+    innerCtx.effect(() => webServer.register({
+      kind: 'exact',
+      path: '/trellis',
+      handler: (_req: IncomingMessage, res: ServerResponse): void => {
+        const html = [
+          '<!doctype html>',
+          '<html lang="en"><head><meta charset="utf-8"><title>Trellis Home</title>',
+          '<style>',
+          'body{margin:0;background:linear-gradient(135deg,#0f1a14,#10281f);color:#e8f5ee;font-family:ui-sans-serif,system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center}',
+          '.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:48px;max-width:520px;text-align:center}',
+          'h1{font-size:32px;margin:0 0 8px}',
+          'p{color:#9fc9b4;margin:0 0 32px}',
+          'a{display:block;background:#1e7a58;color:#fff;text-decoration:none;padding:14px 20px;border-radius:12px;margin:10px 0;font-weight:600}',
+          'a:hover{background:#2ea878}',
+          '</style></head><body>',
+          '<div class="card"><h1>Trellis</h1><p>Your academic + career workbench</p>',
+          '<a href="/">💬 Chat with Agent</a>',
+          '<a href="/trellis/canvas">🕸 Knowledge Canvas</a>',
+          '</div></body></html>',
+        ].join('\n')
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
+        res.end(html)
+      },
+    }), 'trellis: /trellis home route')
   })
 }
