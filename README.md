@@ -96,6 +96,7 @@ When you move the whole `trellis-web` directory to another machine, `.trellis-ho
 |---|---|
 | `/` | Main Trellis chat window |
 | `/trellis` | Trellis home menu |
+| `/trellis/workspace` | Unified workspace: chat + knowledge canvas side by side |
 | `/trellis/canvas` | Interactive knowledge graph canvas |
 
 ## Project Structure
