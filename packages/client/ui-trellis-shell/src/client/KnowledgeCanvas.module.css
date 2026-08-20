@@ -1,0 +1,124 @@
+/* Knowledge Canvas: theme-aware minimal document map. */
+
+.canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--dsw-alias-bg-base);
+  cursor: grab;
+}
+
+.canvas:active {
+  cursor: grabbing;
+}
+
+.viewport {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  width: 0;
+  height: 0;
+}
+
+.edges {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.edgeLine {
+  stroke: var(--dsw-alias-border-l2);
+  stroke-width: 1.5;
+}
+
+.edgeDot {
+  fill: var(--dsw-alias-state-success-primary, #22c55e);
+}
+
+.card {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  box-sizing: border-box;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  text-align: left;
+  cursor: grab;
+  overflow: hidden;
+  box-shadow: var(--dsw-shadow-lv1, 0 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+.card:hover {
+  border-color: var(--dsw-alias-state-success-primary, #22c55e);
+}
+
+.cardActive {
+  border-color: var(--dsw-alias-state-success-primary, #22c55e);
+}
+
+.cardKind {
+  font-size: 11px;
+  color: var(--dsw-alias-label-tertiary);
+  text-transform: uppercase;
+}
+
+.cardTitle {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.cardSummary {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--dsw-alias-label-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardTags {
+  margin-top: auto;
+  font-size: 11px;
+  color: var(--dsw-alias-label-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.controls {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-2);
+}
+
+.controls button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.controls button:hover {
+  border-color: var(--dsw-alias-state-success-primary, #22c55e);
+  color: var(--dsw-alias-state-success-primary, #22c55e);
+}

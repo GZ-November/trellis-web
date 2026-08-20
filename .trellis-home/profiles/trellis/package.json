@@ -1,0 +1,16 @@
+{
+  "name": "dsh-profile-trellis",
+  "private": true,
+  "dependencies": {
+    "@deepseek-ai/dsh-storage-sqlite": "link:/Users/georgezhu/Documents/Sort_out/packages/storage/storage-sqlite",
+    "@trellis/trellis": "link:/Users/georgezhu/Documents/Sort_out/packages/trellis/trellis"
+  },
+  "dsh": {
+    "profile": {
+      "bundles": [
+        "@deepseek-ai/dsh-base",
+        "@deepseek-ai/dsh-web-app"
+      ]
+    }
+  }
+}

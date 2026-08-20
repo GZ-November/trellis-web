@@ -1,0 +1,28 @@
+{
+  "name": "dsh-deepread",
+  "owner": {
+    "name": "xiehuan123",
+    "url": "https://github.com/xiehuan123"
+  },
+  "description": "Deep-reading assistant: extract core claims, argument structure, and key evidence from books and articles, with knowledge-map and Feynman reading modes.",
+  "plugins": [
+    {
+      "name": "dsh-deepread",
+      "source": "./",
+      "description": "Deep-reading assistant: five modes (quick / deep / knowledge-map / Feynman / book) to extract claims, arguments and evidence.",
+      "category": "productivity",
+      "keywords": [
+        "reading",
+        "deep-read",
+        "deep-reading",
+        "knowledge-map",
+        "mindmap",
+        "feynman",
+        "book",
+        "article",
+        "analysis",
+        "chinese"
+      ]
+    }
+  ]
+}

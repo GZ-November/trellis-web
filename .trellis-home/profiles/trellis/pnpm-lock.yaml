@@ -1,0 +1,16 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: false
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@deepseek-ai/dsh-storage-sqlite':
+        specifier: link:/Users/georgezhu/Documents/Sort_out/packages/storage/storage-sqlite
+        version: link:../../../packages/storage/storage-sqlite
+      '@trellis/trellis':
+        specifier: link:/Users/georgezhu/Documents/Sort_out/packages/trellis/trellis
+        version: link:../../../packages/trellis/trellis

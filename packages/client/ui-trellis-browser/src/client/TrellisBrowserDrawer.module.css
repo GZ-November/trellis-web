@@ -1,0 +1,116 @@
+/* Trellis Companion Browser Drawer styling */
+
+.triggerButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-2, #1e293b) 80%, transparent);
+  border: 1px solid var(--dsw-alias-border-l2, rgba(255, 255, 255, 0.1));
+  color: var(--dsw-alias-label-primary, #f1f5f9);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.triggerButton:hover {
+  background: var(--dsw-alias-interactive-bg-hover, rgba(59, 130, 246, 0.15));
+  border-color: var(--dsw-alias-state-success-primary, #22c55e);
+  color: var(--dsw-alias-state-success-primary, #22c55e);
+  transform: translateY(-1px);
+}
+
+.triggerIcon {
+  font-size: 14px;
+}
+
+.triggerLabel {
+  line-height: 16px;
+}
+
+/* Backdrop */
+.drawerBackdrop {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: flex-end;
+  animation: fadeIn 0.2s ease;
+}
+
+/* Slide-out Container */
+.drawerContainer {
+  width: 680px;
+  max-width: 90vw;
+  height: 100%;
+  background: var(--dsw-alias-bg-base, #0b0f17);
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.6);
+  border-left: 1px solid var(--dsw-alias-border-l2, rgba(255, 255, 255, 0.1));
+  display: flex;
+  flex-direction: column;
+  animation: slideLeft 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-2, #131926) 90%, transparent);
+  border-bottom: 1px solid var(--dsw-alias-border-l2, rgba(255, 255, 255, 0.08));
+}
+
+.drawerTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary, #f1f5f9);
+}
+
+.closeButton {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--dsw-alias-border-l1, rgba(255, 255, 255, 0.08));
+  background: var(--dsw-alias-bg-layer-3, rgba(255, 255, 255, 0.05));
+  color: var(--dsw-alias-label-secondary, #94a3b8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.closeButton:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.drawerBody {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideLeft {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}

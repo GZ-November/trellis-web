@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-08-19-trellis-in-app-browser-and-markitdown.md
+2026-08-19-trellis-in-app-browser-and-markitdown.md: 20368dbbc76ba5e19c4964c1f44d66e420feed69
+2026-08-19-trellis-in-app-browser-and-markitdown.zh.md: 0c01f6d97713d8fdf3f29d09a8c4307877b681f7

@@ -1,0 +1,473 @@
+/* Trellis Modern In-App Browser & MarkItDown Reader Workspace */
+
+.browserContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: var(--dsw-alias-bg-base, #0b0f17);
+  color: var(--dsw-alias-label-primary, #e2e8f0);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Top Navigation Bar (Arc / macOS Minimalist Style) ── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-2, #131926) 88%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--dsw-alias-border-l2, rgba(255, 255, 255, 0.08));
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.navGroup {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.navBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-3, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--dsw-alias-border-l1, rgba(255, 255, 255, 0.06));
+  color: var(--dsw-alias-label-secondary, #94a3b8);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navBtn:hover:not(:disabled) {
+  background: var(--dsw-alias-interactive-bg-hover, rgba(255, 255, 255, 0.1));
+  color: var(--dsw-alias-label-primary, #fff);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.navBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Address Form */
+.urlForm {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1, #080c14) 92%, transparent);
+  border: 1px solid var(--dsw-alias-border-l2, rgba(255, 255, 255, 0.1));
+  border-radius: 10px;
+  padding: 0 12px;
+  height: 34px;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.urlForm:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.sslBadge {
+  color: #10b981;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
+}
+
+.urlInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--dsw-alias-label-primary, #f1f5f9);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+
+.urlInput::placeholder {
+  color: var(--dsw-alias-label-tertiary, #64748b);
+}
+
+.clearBtn {
+  border: none;
+  background: transparent;
+  color: var(--dsw-alias-label-caption, #94a3b8);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.clearBtn:hover {
+  color: #fff;
+}
+
+.actionsGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-3, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--dsw-alias-border-l2, rgba(255, 255, 255, 0.08));
+  color: var(--dsw-alias-label-secondary, #cbd5e1);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.actionBtn:hover {
+  background: var(--dsw-alias-interactive-bg-hover, rgba(255, 255, 255, 0.1));
+  color: var(--dsw-alias-label-primary, #fff);
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
+}
+
+/* Prominent 1-Click Clip CTA */
+.clipBtn {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(5, 150, 105, 0.28));
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #34d399;
+}
+
+.clipBtn:hover {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.32), rgba(5, 150, 105, 0.45));
+  border-color: rgba(16, 185, 129, 0.6);
+  color: #6ee7b7;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+}
+
+.chromeBtn {
+  color: #60a5fa;
+  border-color: rgba(96, 165, 250, 0.25);
+}
+
+.chromeBtn:hover {
+  background: rgba(96, 165, 250, 0.12);
+  border-color: rgba(96, 165, 250, 0.45);
+}
+
+/* ── Secondary Info Ribbon ── */
+.noticeBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1, #0c1017) 95%, transparent);
+  border-bottom: 1px solid var(--dsw-alias-border-l1, rgba(255, 255, 255, 0.05));
+  font-size: 11px;
+  color: var(--dsw-alias-label-tertiary, #94a3b8);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* ── Main Workspace Area ── */
+.workspace {
+  position: relative;
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  background: var(--dsw-alias-bg-base, #0b0f17);
+}
+
+.frameWrapper {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #ffffff;
+}
+
+/* ── Study Hub Launchpad ── */
+.launchpadWrapper {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.08), transparent 45%),
+    radial-gradient(circle at 10% 80%, rgba(16, 185, 129, 0.05), transparent 40%),
+    var(--dsw-alias-bg-base, #0b0f17);
+}
+
+.launchpadHeader {
+  text-align: center;
+  max-width: 600px;
+  margin-bottom: 28px;
+}
+
+.launchpadTitle {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #f8fafc;
+  letter-spacing: -0.01em;
+}
+
+.launchpadSubtitle {
+  margin: 0;
+  font-size: 13px;
+  color: var(--dsw-alias-label-tertiary, #94a3b8);
+  line-height: 1.5;
+}
+
+.hubGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 880px;
+}
+
+.hubCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-2, #131926) 90%, transparent);
+  border: 1px solid var(--dsw-alias-border-l2, rgba(255, 255, 255, 0.08));
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+}
+
+.hubCard:hover {
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-3, #1e2638) 95%, transparent);
+  border-color: rgba(96, 165, 250, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.hubCardIcon {
+  font-size: 22px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.hubCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hubCardName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.hubCardUrl {
+  font-size: 11px;
+  color: #64748b;
+  word-break: break-all;
+}
+
+/* ── MarkItDown Reader Mode ── */
+.readerWrapper {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 40px;
+  max-width: 800px;
+  margin: 0 auto;
+  color: var(--dsw-alias-label-primary, #e2e8f0);
+}
+
+.readerMetaRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.readerBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #93c5fd;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.readerTitle {
+  margin: 0 0 10px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #f8fafc;
+}
+
+.readerUrl {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 24px;
+  word-break: break-all;
+}
+
+.readerBody {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #cbd5e1;
+  white-space: pre-wrap;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ── Frosted Glass Bookmarks Drawer ── */
+.bookmarksDrawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 320px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-2, #101520) 95%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-left: 1px solid var(--dsw-alias-border-l2, rgba(255, 255, 255, 0.1));
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.35);
+  animation: slideInRight 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1, rgba(255, 255, 255, 0.08));
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.bookmarkList {
+  list-style: none;
+  margin: 0;
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bookmarkItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bookmarkItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateX(-2px);
+}
+
+.bookmarkInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bookmarkName {
+  font-size: 13px;
+  font-weight: 500;
+  color: #f1f5f9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bookmarkUrl {
+  font-size: 11px;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.deleteBtn {
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.deleteBtn:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* ── Toast Feedback Notification ── */
+.statusToast {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #10b981;
+  color: #ffffff;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+  z-index: 30;
+  animation: toastFade 0.25s ease-out;
+  pointer-events: none;
+}
+
+@keyframes toastFade {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}

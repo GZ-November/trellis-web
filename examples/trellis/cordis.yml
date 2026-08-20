@@ -1,0 +1,84 @@
+# Trellis overlay for the web profile.
+#
+# Chat-free workbench UI: the standalone Trellis shell shadows the regular
+# three-column conversation layout while keeping sessions/workspaces services
+# underneath for capture and analysis. Collection is bar-first: paste a link,
+# text, or drop a document and the agent archives it into the knowledge base.
+- id: webserver
+  config:
+    host: 127.0.0.1
+    port: 3081
+
+- id: storage-domain
+  config:
+    backend: sqlite
+
+# Trellis is a knowledge-base assistant, not a coding agent.
+- id: system-prompt
+  config:
+    persona: >-
+      You are Trellis, a personal knowledge base and multi-source research
+      assistant powered by the {{model}} model. Your working directory is
+      {{cwd}}. You collect, organize, connect, analyze, and retrieve the
+      user's source material.
+
+# DeepSeek native web search stays available to capture/analysis prompts.
+- id: tool-web
+  disabled: false
+  config:
+    search: true
+    fetch: false
+    searchTimeoutMs: 60000
+
+# Conversation-slot Trellis views are not rendered by the standalone shell;
+# the shell integrates the knowledge ledger, canvas, and browser drawer itself.
+- id: ui-trellis-graph
+  disabled: true
+
+- id: ui-trellis-browser
+  disabled: true
+
+- id: ui-trellis-knowledge
+  disabled: true
+
+- insert:
+    - id: storage-sqlite
+      name: '@deepseek-ai/dsh-storage-sqlite'
+      config:
+        # The path suffix follows trellisDomainSpec.version; domain versions
+        # intentionally reject a medium stamped with another record format.
+        path: !!js process.cwd() + '/.trellis-data/trellis-v2.db'
+
+    - id: trellis
+      name: '@trellis/trellis'
+
+    # Trellis standalone shell shadows the chat/workspace layout.
+    - id: ui-trellis-shell
+      name: '@deepseek-ai/dsh-client-ui-trellis-shell'
+
+    # Host/tool plugins: URL reading, deep reading, file conversion, memory.
+    - id: dsh-read-url
+      name: dsh-read-url
+
+    - id: deepread
+      name: dsh-deepread
+
+    - id: file-upload
+      name: dsh-file-upload
+
+    - id: memory-palace
+      name: dsh-memory-palace
+
+    # UI plugins adapted for the Trellis shell.
+    - id: dsh-spotlight
+      name: '@0xsline/dsh-spotlight'
+
+    - id: taskboard
+      name: '@dph/taskboard'
+
+    # Research and academic writing plugins.
+    - id: zotero
+      name: dsh-zotero
+
+    - id: academic-writing
+      name: dsh-plugin-academic-writing

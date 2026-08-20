@@ -1,0 +1,88 @@
+packages:
+  - vendor/*
+  - packages/*/*
+  # The Landlock launcher is developed with its harness consumers but keeps
+  # its native build and publication scripts under native/landlock-run.
+  - native/landlock-run
+  - native/landlock-run/packages/*
+  # Product assemblies over the package tier; apps/cli owns the `dsh` bin.
+  - apps/*
+  - website
+  # The runnable demo leaves join as ONE workspace member: examples/package.json
+  # declares the union of every leaf's cordis.yml plugins as workspace:*, so a
+  # plain-node (`:lib`) boot of any leaf (examples/<leaf>/cordis.yml) resolves its
+  # plugins through real package `exports`→lib by walking up to examples/node_modules.
+  # Members for DEPENDENCY RESOLUTION only — NOT build targets: tsdown's explicit
+  # globs (vendor/*, packages/*/*) exclude them. See examples/AGENTS.md and the archived
+  # run-ci-examples-from-built-lib Agent Note.
+  - examples
+  # Deploy root of the single-exe build: a pure dependency manifest whose
+  # closure is what the exe bundles and what the Python runtime distributes.
+  - python/sdk-runtime
+
+# Vendored framework packages keep their upstream semver ranges, while local
+# builds must resolve those matching names to this workspace's pinned sources.
+linkWorkspacePackages: true
+
+overrides:
+  '@deepseek-ai/cosmokit': 'link:vendor/cosmokit'
+  '@deepseek-ai/schemastery': 'link:vendor/schemastery'
+
+peerDependencyRules:
+  allowedVersions:
+    typescript: '>=5 <7'
+
+# pnpm 10+ blocks any dependency shipping an install/build script until it is
+# explicitly reviewed here (strictDepBuilds defaults to true: an unlisted script
+# is a hard install error). Every such package MUST be listed; we deny by
+# default and only allow scripts we need. esbuild (native binary) and lefthook
+# (git hooks) genuinely need theirs.
+allowBuilds:
+  esbuild: true
+  lefthook: true
+  # External DSH plugins fetched from GitHub for the Trellis profile; their
+  # prepare/build scripts are reviewed by the upstream repos and needed to
+  # produce runnable lib bundles.
+  '@0xsline/dsh-spotlight@https://codeload.github.com/0xsline/dsh-spotlight/tar.gz/dd7ef5ed160aa1a624559de16eafd4ea9406d7ed': true
+  '@dph/taskboard@https://codeload.github.com/1070296335-create/dph-taskboard/tar.gz/ceda7a378b713afdfcae4d94b670b026f2e24100': true
+  'dsh-read-url@https://codeload.github.com/2672243194/dsh-read-url/tar.gz/8d9756dedc2d9ef6f7205063a558baae4a359645': true
+  'dsh-deepread@https://codeload.github.com/xiehuan123/dsh-deepread/tar.gz/cbfffab353112180456a6c26ed83de092d54ac12': true
+  'dsh-file-upload@https://codeload.github.com/HongMing-Huang/dsh-file-upload/tar.gz/0c86706305f40fd05e2c8dbf7853ac0bdcf7bcde': true
+  'dsh-memory-palace@https://codeload.github.com/lovezi0/dsh-memory-palace/tar.gz/7f59740e9c765ce907e960b0a682a17d471cc841': true
+  'dsh-zotero@https://codeload.github.com/Vncntvx/dsh-zotero/tar.gz/439e9d1f81f28f3d75b8ed365207396e341cd5ea': true
+  'dsh-plugin-academic-writing@https://codeload.github.com/863683348/dsh-plugin-academic-writing/tar.gz/a4deeb4c3234a114add69c13dfefd50576d20bac': true
+  # Cross-platform boundary for the persistent PTY backend, including ConPTY on Windows.
+  node-pty: true
+  # Pulled in by @earendil-works/pi-ai (optional LLM API backend). pnpm lists
+  # them only because they ship lifecycle scripts, but those are no-ops we don't
+  # need, so we deny them — install still succeeds.
+  '@google/genai': false
+  protobufjs: false
+  node-addon-require-builtin: false
+  # JSONL durability calls MoveFileExW with write-through publication on Windows.
+  koffi: true
+  # The Python runtime deploy includes the reviewed workspace postinstall that
+  # restores the executable bit on node-pty's macOS spawn helper.
+  '@deepseek-ai/dsh-subprocess-local@file:packages/subprocess/subprocess-local': true
+  # Native file-watching and image pipelines need their optional binaries.
+  fsevents: true
+  sharp: true
+  # tesseract.js only runs an opencollective postinstall; no native build.
+  tesseract.js: false
+
+minimumReleaseAgeExclude:
+  # Fresh pi-ai releases carry the model catalog updates that are the whole
+  # point of bumping it; waiting out the release age would defeat that.
+  - '@earendil-works/pi-ai@0.82.1'
+  - node-addon-native-custom-loader@0.1.4
+  - node-addon-require-builtin-darwin-arm64@0.1.4
+  - node-addon-require-builtin-darwin-x64@0.1.4
+  - node-addon-require-builtin-linux-arm64-gnu@0.1.4
+  - node-addon-require-builtin-linux-x64-gnu@0.1.4
+  - node-addon-require-builtin-win32-arm64-msvc@0.1.4
+  - node-addon-require-builtin-win32-ia32-msvc@0.1.4
+  - node-addon-require-builtin-win32-x64-msvc@0.1.4
+  - node-addon-require-builtin@0.1.4
+
+patchedDependencies:
+  node-pty@1.2.0-beta.15: patches/node-pty@1.2.0-beta.15.patch

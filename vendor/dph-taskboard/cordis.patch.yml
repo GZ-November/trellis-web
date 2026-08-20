@@ -1,0 +1,7 @@
+# DPH 任务看板（@dph/taskboard）注册行。
+# 这份文件是仓库根的 bundle manifest（package.json 的 dsh.bundle.patch 指向它），
+# 也是 scripts/deploy.mjs 写入 profile 时的内容来源（单一来源，避免漂移）。
+# 注意：name 必须加引号，@ 是 YAML 保留字符。
+- insert:
+    - id: taskboard
+      name: "@dph/taskboard"

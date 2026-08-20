@@ -1,0 +1,45 @@
+{
+  "name": "@dph/taskboard",
+  "version": "0.1.0",
+  "description": "DeepSeek Harness 任务看板插件：侧边栏看板入口、会话化四列状态看板（拖拽归类）、新建会话（模型/推理强度/分组）、回收站恢复、备注、导出导入",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "src"
+  ],
+  "keywords": [
+    "deepseek",
+    "harness",
+    "dsh",
+    "taskboard",
+    "kanban",
+    "plugin"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "sessions",
+        "workspaces",
+        "connection"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "mount:workspace": "node scripts/mount-ui-workspace.mjs",
+    "deploy": "node scripts/deploy.mjs",
+    "test": "node smoke-test.mjs",
+    "restart": "bash scripts/restart-harness.sh"
+  },
+  "license": "MIT"
+}

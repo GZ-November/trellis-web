@@ -1,0 +1,46 @@
+# Keyless real composition for the Trellis ingestion and graph transcript.
+- id: trellis-mock-llm
+  name: './trellis-mock-llm.ts'
+
+- id: storage
+  name: '@deepseek-ai/dsh-storage'
+
+- id: storage-json
+  name: '@deepseek-ai/dsh-storage-json'
+  config:
+    root: './.storage'
+
+- id: storage-domain
+  name: '@deepseek-ai/dsh-storage-domain'
+  config:
+    backend: json
+
+- id: web
+  name: '@deepseek-ai/dsh-web'
+
+- id: trellis
+  name: '@trellis/trellis'
+
+- id: agent-spine
+  name: '@deepseek-ai/dsh-agent-spine-demo'
+  config:
+    agents:
+      - id: main
+        provider: trellis-mock
+        model: trellis-mock
+        cwd: !!js process.cwd()
+    persona: 'Organize personal study material in Trellis.'
+    workspaceContext: false
+    skills:
+      enabled: false
+    toolBash: false
+    toolJobs: false
+
+- id: persistence
+  name: '@deepseek-ai/dsh-session-persistence-jsonl'
+  config:
+    root: './.sessions'
+    compression: none
+
+- id: checkpoint-policy
+  name: '@deepseek-ai/dsh-session-checkpoint-policy'
